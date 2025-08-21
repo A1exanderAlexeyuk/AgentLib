@@ -1,13 +1,38 @@
 Package: AgentLib
-Title: What the Package Does (One Line, Title Case)
+Title: Multi-Agent System Framework for R
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Alexander", "Alexeyuk", , "a1exander.alexeyuk@example.com", role = c("aut", "cre"))
+Description: A comprehensive framework for building and managing multi-agent systems in R. 
+    Provides tools for creating intelligent agents with customizable behaviors, 
+    communication protocols, and coordination mechanisms. Supports various agent 
+    architectures including reactive, deliberative, and hybrid models. Features 
+    include agent lifecycle management, message passing, environment simulation, 
+    and distributed computing capabilities for complex multi-agent scenarios.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 URL: https://github.com/A1exanderAlexeyuk/AgentLib
 BugReports: https://github.com/A1exanderAlexeyuk/AgentLib/issues
+Depends: 
+    R (>= 4.0.0)
+Imports:
+    R6 (>= 2.5.0),
+    future (>= 1.32.0),
+    promises (>= 1.2.0),
+    jsonlite (>= 1.8.0),
+    uuid (>= 1.1.0),
+    data.table (>= 1.14.0),
+    parallel (>= 4.0.0),
+    methods
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    covr,
+    devtools,
+    pkgdown
+VignetteBuilder: knitr
+LazyData: true
+ByteCompile: true
