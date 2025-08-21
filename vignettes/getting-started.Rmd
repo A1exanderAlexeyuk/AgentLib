@@ -1,0 +1,357 @@
+---
+title: "Getting Started with AgentLib"
+author: "Alexander Alexeyuk"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with AgentLib}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE  # Set to FALSE to avoid API calls during package build
+)
+```
+
+# Introduction
+
+AgentLib is a comprehensive R package for building advanced AI agents using the ellmer framework. This vignette will guide you through the key features and demonstrate how to create and use different types of agents.
+
+## Installation
+
+```{r setup}
+# Install from GitHub (development version)
+# devtools::install_github("A1exanderAlexeyuk/AgentLib")
+
+library(AgentLib)
+```
+
+## Basic Agent Usage
+
+### Creating Your First Agent
+
+The `BaseAgent` class provides the foundation for all AI agents in AgentLib:
+
+```{r basic-agent}
+# Create a basic agent
+agent <- BaseAgent$new(
+  provider = "openai/gpt-4",
+  agent_name = "MyAssistant",
+  system_prompt = "You are a helpful AI assistant that provides clear, concise answers.",
+  logging_enabled = TRUE
+)
+```
+
+### Having Conversations
+
+Once created, you can interact with your agent using the `ask()` method:
+
+```{r conversation}
+# Simple conversation
+response <- agent$ask("What is machine learning?")
+print(response)
+
+# Ask follow-up questions
+response2 <- agent$ask("Can you give me a practical example?")
+print(response2)
+```
+
+### Using Built-in Tools
+
+All agents come with useful built-in tools:
+
+```{r tools}
+# Get current time
+time_response <- agent$ask("What time is it in Tokyo?")
+print(time_response)
+
+# Perform calculations
+calc_response <- agent$ask("Calculate the square root of 256")
+print(calc_response)
+
+# Use memory functions
+agent$ask("Remember that my favorite color is blue")
+memory_response <- agent$ask("What is my favorite color?")
+print(memory_response)
+```
+
+## Specialized Agents
+
+### Medical Writer Agent
+
+The `MedicalWriterAgent` is specialized for medical writing tasks:
+
+```{r medical-agent}
+# Create medical writing agent
+medical_agent <- MedicalWriterAgent$new(
+  provider = "openai/gpt-4",
+  agent_name = "MedicalExpert"
+)
+
+# Create clinical protocol
+protocol <- medical_agent$create_protocol(
+  study_title = "Efficacy of Novel Antihypertensive Agent",
+  indication = "Essential Hypertension",
+  study_design = "Randomized, Double-blind, Placebo-controlled Trial",
+  primary_endpoint = "Change in systolic blood pressure from baseline",
+  sample_size = "300 patients"
+)
+print(protocol)
+```
+
+#### Medical Writing Features
+
+```{r medical-features}
+# Generate regulatory summary
+reg_summary <- medical_agent$create_regulatory_summary(
+  drug_name = "Cardioprotect-XYZ",
+  indication = "Hypertension",
+  submission_type = "NDA",
+  key_findings = "Significant BP reduction with good safety profile"
+)
+
+# Create medical abstract
+abstract <- medical_agent$create_abstract(
+  title = "Novel ACE Inhibitor in Hypertensive Patients",
+  study_type = "Randomized Controlled Trial",
+  results_summary = "30% reduction in systolic BP, 25% reduction in diastolic BP",
+  conclusion = "Demonstrates superior efficacy with good tolerability",
+  word_limit = 250
+)
+```
+
+### Data Analytics Agent
+
+The `DataAnalyticsAgent` specializes in data analysis and machine learning:
+
+```{r analytics-agent}
+# Create analytics agent
+analytics_agent <- DataAnalyticsAgent$new(
+  provider = "openai/gpt-4",
+  agent_name = "DataScientist"
+)
+
+# Generate and load sample data
+data_summary <- analytics_agent$load_dataset(
+  dataset_name = "sales_data",
+  description = "Monthly sales performance data for analysis"
+)
+print(data_summary)
+```
+
+#### Analytics Workflow
+
+```{r analytics-workflow}
+# Perform statistical analysis
+analysis <- analytics_agent$analyze_data(
+  dataset_name = "sales_data",
+  analysis_type = "descriptive",
+  variables = "revenue, units_sold",
+  hypothesis = "Revenue correlates with units sold"
+)
+
+# Create visualizations
+viz <- analytics_agent$create_visualization(
+  dataset_name = "sales_data",
+  plot_type = "scatter",
+  variables = "units_sold, revenue",
+  title = "Sales Performance Analysis"
+)
+
+# Build predictive model
+model <- analytics_agent$build_model(
+  dataset_name = "sales_data",
+  model_type = "linear_regression",
+  target_variable = "revenue",
+  feature_variables = "units_sold, region"
+)
+
+# Generate comprehensive report
+report <- analytics_agent$generate_report(
+  analysis_name = "Sales Performance Analysis",
+  datasets = "sales_data", 
+  key_findings = "Strong correlation between units sold and revenue",
+  recommendations = "Focus marketing efforts on high-performing regions"
+)
+```
+
+## Agent Factory
+
+For quick agent creation, use the agent factory:
+
+```{r factory}
+# Create different agents quickly
+base_agent <- create_agent("base", provider = "openai/gpt-4")
+medical_agent <- create_agent("medical", provider = "anthropic/claude-3")
+analytics_agent <- create_agent("analytics", provider = "openai/gpt-4")
+
+# All agents are immediately ready to use
+response1 <- base_agent$ask("Hello!")
+response2 <- medical_agent$ask("What is pharmacovigilance?")
+response3 <- analytics_agent$ask("Explain cross-validation")
+```
+
+## Custom Tools
+
+Extend agent capabilities with custom tools:
+
+```{r custom-tools}
+# Create a sentiment analysis tool
+sentiment_tool <- ellmer::tool(
+  function(text) {
+    # Simple sentiment analysis implementation
+    positive_words <- c("good", "great", "excellent", "amazing", "wonderful")
+    negative_words <- c("bad", "terrible", "awful", "horrible", "disappointing")
+    
+    text_lower <- tolower(text)
+    pos_count <- sum(sapply(positive_words, function(w) grepl(w, text_lower)))
+    neg_count <- sum(sapply(negative_words, function(w) grepl(w, text_lower)))
+    
+    if (pos_count > neg_count) return("Positive")
+    if (neg_count > pos_count) return("Negative")
+    return("Neutral")
+  },
+  name = "analyze_sentiment",
+  description = "Analyze the sentiment of text input",
+  arguments = list(
+    text = ellmer::type_string("Text to analyze for sentiment")
+  )
+)
+
+# Register with agent
+agent$register_tool(sentiment_tool)
+
+# Use the custom tool
+result <- agent$ask("Analyze sentiment: 'This product is amazing and I love it!'")
+print(result)
+```
+
+## Advanced Features
+
+### Batch Processing
+
+Process multiple prompts efficiently:
+
+```{r batch}
+# Prepare multiple prompts
+prompts <- c(
+  "What is artificial intelligence?",
+  "Explain machine learning briefly",
+  "What are neural networks?",
+  "How does deep learning work?"
+)
+
+# Process in batch
+results <- batch_process(
+  agent = agent,
+  prompts = prompts,
+  delay_seconds = 1,
+  save_results = TRUE
+)
+
+# Results include responses, timestamps, and cost information
+str(results[[1]])
+```
+
+### Agent Comparison
+
+Compare how different agents handle the same question:
+
+```{r comparison}
+# Create comparison
+comparison <- compare_agents(
+  agents = list(base_agent, medical_agent),
+  prompt = "What are the key components of a clinical trial?",
+  agent_names = c("BaseAgent", "MedicalAgent")
+)
+
+# View results
+print(comparison$summary)
+```
+
+### Performance Monitoring
+
+Monitor agent performance and resource usage:
+
+```{r monitoring}
+# Validate agent configuration
+validation <- validate_agent(agent, run_tests = TRUE)
+print(validation$summary)
+
+# Get agent status
+status <- agent$get_status()
+print(status)
+
+# Export configuration for reproducibility
+config <- export_agent_config(agent, include_tools = TRUE)
+str(config, max.level = 2)
+```
+
+### Conversation Management
+
+Manage conversation history and context:
+
+```{r conversation-mgmt}
+# Save conversation to file
+agent$save_conversation("my_session.rds")
+
+# Get conversation history
+history <- agent$get_history()
+length(history)
+
+# Get token usage and costs
+tokens <- agent$get_tokens()
+cost <- agent$get_cost()
+
+# Clear history when needed
+agent$clear_history()
+```
+
+## Error Handling and Best Practices
+
+### Robust Error Handling
+
+```{r error-handling}
+# Wrap agent calls in error handling
+tryCatch({
+  response <- agent$ask("Complex query that might fail")
+  print(response)
+}, error = function(e) {
+  cat("Error occurred:", e$message, "\n")
+  # Handle error appropriately
+})
+```
+
+### Best Practices
+
+1. **Set appropriate context lengths** based on your use case
+2. **Use descriptive agent names** for better logging and debugging
+3. **Enable logging** for production applications
+4. **Monitor costs** especially with large-scale deployments
+5. **Validate agents** before putting them into production
+6. **Save important conversations** for analysis and debugging
+
+## Conclusion
+
+AgentLib provides a powerful and flexible framework for building AI agents in R. Whether you need basic conversational AI, specialized medical writing assistance, or comprehensive data analytics capabilities, AgentLib has you covered.
+
+Key takeaways:
+
+- Start with `BaseAgent` for general-purpose AI assistance
+- Use specialized agents (`MedicalWriterAgent`, `DataAnalyticsAgent`) for domain-specific tasks
+- Extend functionality with custom tools
+- Leverage batch processing for efficiency
+- Monitor performance and manage resources carefully
+- Save and share agent configurations for reproducibility
+
+For more advanced examples and detailed documentation, see:
+
+- `examples/basic_usage.R` - Comprehensive basic examples
+- `examples/advanced_examples.R` - Advanced workflows and custom tools
+- Individual function documentation via `?function_name`
+
+Happy agent building!
